@@ -1,0 +1,43 @@
+### log
+/logs/*.log
+/logs/*.log.*
+
+### Java template
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# IntelliJ project files
+.idea
+.idea/*.xml
+*.iml
+out
+gen
+build
+rebel.xml
+
+# Compliled files
+/target/
+**/target
+
+# Gradle
+.gradle
+.gradle/
+build/
+/.gradle/
+
+### Gradle Patch ###
+**/build/
+/build/
+
+# Cache of project
+.gradletasknamecache
+
+# Mac OS
+*.DS_Store
+/.idea/
+
+
