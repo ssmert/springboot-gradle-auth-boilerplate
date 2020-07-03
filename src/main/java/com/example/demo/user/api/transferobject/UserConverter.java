@@ -15,7 +15,6 @@ public class UserConverter {
     public UserResponse convert(User user) {
         UserResponse response = new UserResponse();
         BeanUtils.copyProperties(user, response);
-        response.setUserRoles(user.getUserRoles());
         return response;
     }
 }

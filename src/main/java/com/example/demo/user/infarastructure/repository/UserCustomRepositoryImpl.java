@@ -3,6 +3,7 @@ package com.example.demo.user.infarastructure.repository;
 
 import com.example.demo.core.infrastructure.constant.YesOrNo;
 import com.example.demo.core.util.CheckUtil;
+import com.example.demo.role.domain.QRole;
 import com.example.demo.user.domain.QUser;
 import com.example.demo.user.domain.User;
 import com.querydsl.core.BooleanBuilder;
@@ -29,11 +30,9 @@ public class UserCustomRepositoryImpl extends QuerydslRepositorySupport implemen
     @Override
     public List<User> getUserList(String userId, YesOrNo userUseYn) {
         QUser qUser = QUser.user;
-
-        JPQLQuery query = from(qUser);
+        QRole qRole = QRole.role;
 
         BooleanBuilder predicate = new BooleanBuilder();
-
         if (CheckUtil.isNotNullOrNotEmpty(userId)) {
             predicate.and(qUser.userId.contains(userId));
         }
@@ -41,9 +40,12 @@ public class UserCustomRepositoryImpl extends QuerydslRepositorySupport implemen
             predicate.and(qUser.userUseYn.eq(userUseYn));
         }
 
+        JPQLQuery<User> query = from(qUser);
+
+        query.join(qUser.userRoles, qRole);
         query.where(predicate);
         query.orderBy(qUser.regDt.asc());
 
-        return query.select(qUser).fetch();
+        return query.select(qUser).fetchJoin().fetch();
     }
 }
