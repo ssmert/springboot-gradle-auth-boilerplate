@@ -74,7 +74,7 @@ public class UserController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
     @PostMapping(value = "")
     public @ResponseBody
-    HttpEntity<Void> registerCh(@RequestBody UserRequest userRequest) {
+    HttpEntity<Void> registerUser(@RequestBody UserRequest userRequest) {
         // 사용자를 등록한다.
         changeUserService.registerUser(userRequest);
 
