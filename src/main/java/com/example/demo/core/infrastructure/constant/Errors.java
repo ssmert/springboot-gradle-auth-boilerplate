@@ -1,6 +1,5 @@
 package com.example.demo.core.infrastructure.constant;
 
-
 import com.example.demo.core.util.CheckUtil;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
@@ -15,8 +14,9 @@ public class Errors {
     /**
      * 주어진 메세지 코드와 아귀먼트로 조립된 메세지 내용을 반환한다.
      *
-     * @param msgCd   메세지 코드
+     * @param msgCd 메세지 코드
      * @param msgArgs 메세지 아귀먼트
+     *
      * @return 메세지 내용
      */
     public static String getCdMsg(String msgCd, Object... msgArgs) {
@@ -38,8 +38,15 @@ public class Errors {
             if (null != em) {
                 msgCtnt = em.getMessage();
             }
-        } else if (msgCd.startsWith("ROLE")) {
+        }
+        else if (msgCd.startsWith("ROLE")) {
             RoleErrCd em = RoleErrCd.codeOf(msgCd);
+            if (null != em) {
+                msgCtnt = em.getMessage();
+            }
+        }
+        else if (msgCd.startsWith("EX")) {
+            ExErrCd em = ExErrCd.codeOf(msgCd);
             if (null != em) {
                 msgCtnt = em.getMessage();
             }
@@ -50,7 +57,8 @@ public class Errors {
         try {
             msgCtnt = (null == msgCtnt ? msgCd : msgCtnt);
             msgCtnt = String.format(msgCtnt, msgArgs);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
         }
 
         return msgCtnt;
@@ -93,6 +101,7 @@ public class Errors {
          * 코드에 해당되는 열거형 상수를 반환한다.
          *
          * @param code 코드
+         *
          * @return 코드에 해당되는 열거형 상수
          */
         public final static AuthErrCd codeOf(String code) {
@@ -145,6 +154,7 @@ public class Errors {
          * 코드에 해당되는 열거형 상수를 반환한다.
          *
          * @param code 코드
+         *
          * @return 코드에 해당되는 열거형 상수
          */
         public final static UserErrCd codeOf(String code) {
@@ -197,10 +207,60 @@ public class Errors {
          * 코드에 해당되는 열거형 상수를 반환한다.
          *
          * @param code 코드
+         *
          * @return 코드에 해당되는 열거형 상수
          */
         public final static RoleErrCd codeOf(String code) {
             for (RoleErrCd em : values()) {
+                if (em.getCode().equals(code)) {
+                    return em;
+                }
+            }
+
+            return null;
+        }
+
+        @JsonValue
+        @Override
+        public String toString() {
+            return this.getCode();
+        }
+    }
+
+    /**
+     * 역할 관련 오류코드 enum 클래스이다.
+     *
+     * <ul>
+     * <li>ROLE + S + [000 ~ 999]</li>
+     * <li>S(시스템)</li>
+     * </ul>
+     *
+     * @author jonghyeon
+     */
+    @Getter
+    @AllArgsConstructor
+    public enum ExErrCd {
+        /**
+         * 존재하지않는 예제입니다. : [%s]
+         */
+        EXS001("EXS001", "존재하지않는 예제입니다. : [%s]"),
+        /**
+         * "동일한 아이디가 존재합니다. : [%s]"
+         */
+        EXS002("EXS002", "동일한 아이디가 존재합니다. : [%s]");
+
+        private String code;
+        private String message;
+
+        /**
+         * 코드에 해당되는 열거형 상수를 반환한다.
+         *
+         * @param code 코드
+         *
+         * @return 코드에 해당되는 열거형 상수
+         */
+        public final static ExErrCd codeOf(String code) {
+            for (ExErrCd em : values()) {
                 if (em.getCode().equals(code)) {
                     return em;
                 }
