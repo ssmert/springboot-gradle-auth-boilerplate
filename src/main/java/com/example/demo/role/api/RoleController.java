@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -71,7 +72,7 @@ public class RoleController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
     @PostMapping(value = "")
     public @ResponseBody
-    HttpEntity<Void> registerCh(@RequestBody RoleRequest roleRequest) {
+    HttpEntity<Void> registerRole(@RequestBody @Valid RoleRequest roleRequest) {
         // 역할를 등록한다.
         changeRoleService.registerRole(roleRequest);
 
