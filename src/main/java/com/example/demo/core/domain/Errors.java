@@ -15,6 +15,7 @@ public enum Errors {
     EXPIRED_TOKEN(1004, "만료된 토큰입니다."),
     EXPIRED_ALL_TOKEN(1005, "세션이 만료되었습니다.\n다시 로그인 해주세요."),
     UNAUTHORIZED(1006, "인증되지 않은 사용자입니다."),
+    BAD_REQUEST(1007, "잘못된 요청입니다."),
 
 
     NOT_FOUND_USER(2001, "존재하지 않는 사용자입니다."),
