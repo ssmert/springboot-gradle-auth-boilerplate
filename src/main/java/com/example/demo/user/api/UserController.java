@@ -1,114 +1,83 @@
 package com.example.demo.user.api;
 
-import com.example.demo.core.infrastructure.constant.YesOrNo;
-import com.example.demo.user.api.transferobject.UserRequest;
-import com.example.demo.user.api.transferobject.UserResponse;
+import com.example.demo.user.api.dto.UserDetailResponse;
+import com.example.demo.user.api.dto.UserRequest;
+import com.example.demo.user.api.dto.UserResponse;
 import com.example.demo.user.application.ChangeUserService;
 import com.example.demo.user.application.RetrieveUserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
- * 사용자 REST 컨트롤러이다.
- *
- * @author jonghyeon
+ * 사용자 컨트롤러
  */
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    /**
-     * 사용자 조회 서비스
-     */
     private final RetrieveUserService retrieveUserService;
-
-    /**
-     * 사용자 변경 서비스
-     */
     private final ChangeUserService changeUserService;
 
-    @ApiOperation(value = "사용자 목록을 조회한다.", nickname = "retrieveUserList")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success", response = UserResponse.class)})
+    @ApiOperation(value = "사용자 목록를 조회한다.", nickname = "retrieveUserList")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = UserResponse.class) })
     @GetMapping(value = "")
     public @ResponseBody
-    ResponseEntity<List<UserResponse>> retrieveUserList(@RequestParam(value = "userId", required = false, defaultValue = "") String userId,
-                                                        @RequestParam(value = "userUseYn", required = false) YesOrNo userUseYn) {
-        ResponseEntity<List<UserResponse>> responseEntity;
-
-        // 사용자 목록을 조회한다.
-        List<UserResponse> responses = retrieveUserService.retrieveUserList(userId, userUseYn);
-        if (responses.isEmpty()) {
-            // 응답(내용없음)을 설정한다.
-            responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            // 응답(성공)을 설정한다.
-            responseEntity = new ResponseEntity<>(responses, HttpStatus.OK);
-        }
-
-        return responseEntity;
+    ResponseEntity<List<UserResponse>> retrieveUserList() {
+        List<UserResponse> responses = retrieveUserService.retrieveUserList();
+        return responses.isEmpty() ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
     @ApiOperation(value = "사용자를 조회한다.", nickname = "retrieveUser")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success", response = UserResponse.class)})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = UserResponse.class) })
     @GetMapping(value = "/{user-id}")
     public @ResponseBody
-    ResponseEntity<UserResponse> retrieveUser(@PathVariable("user-id") String userId) {
-        // 사용자를 조회한다.
+    ResponseEntity<UserResponse> retrieveUser(@PathVariable("user-id") Long userId) {
         UserResponse response = retrieveUserService.retrieveUser(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-        // 응답(성공)을 설정한다.
-        ResponseEntity<UserResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
-
-        return responseEntity;
+    @ApiOperation(value = "사용자 상세를 조회한다.", nickname = "retrieveUserDetail")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = UserDetailResponse.class) })
+    @GetMapping(value = "/{user-id}/auth")
+    public @ResponseBody
+    ResponseEntity<UserDetailResponse> retrieveUserDetail(@PathVariable("user-id") Long userId) {
+        UserDetailResponse response = retrieveUserService.retrieveUserDetail(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "사용자를 등록한다.", nickname = "registerUser")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success") })
     @PostMapping(value = "")
     public @ResponseBody
-    HttpEntity<Void> registerUser(@RequestBody UserRequest userRequest) {
-        // 사용자를 등록한다.
+    HttpEntity<Void> registerUser(@RequestBody @Valid UserRequest userRequest) {
         changeUserService.registerUser(userRequest);
-
-        // 응답(생성)을 설정한다.
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
-
-        return responseEntity;
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "사용자를 수정한다.", nickname = "editUser")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success") })
     @PutMapping(value = "/{user-id}")
     public @ResponseBody
-    HttpEntity<Void> editUser(@PathVariable("user-id") String userId, @RequestBody UserRequest userRequest) {
-        // 사용자를 수정한다.
+    HttpEntity<Void> editUser(@PathVariable("user-id") Long userId, @RequestBody @Valid UserRequest userRequest) {
         changeUserService.editUser(userId, userRequest);
-
-        // 응답(내용없음)을 설정한다.
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-        return responseEntity;
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ApiOperation(value = "사용자를 삭제한다.", nickname = "deleteUser")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Success") })
     @DeleteMapping(value = "/{user-id}")
     public @ResponseBody
-    HttpEntity<Void> deleteUser(@PathVariable("user-id") String userId) {
-        // 사용자를 삭제한다.
+    HttpEntity<Void> deleteUser(@PathVariable("user-id") Long userId) {
         changeUserService.deleteUser(userId);
-
-        // 응답(내용없음)을 설정한다.
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-        return responseEntity;
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

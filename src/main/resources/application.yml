@@ -6,28 +6,31 @@ server:
   servlet:
     context-path: /demo-server
     encoding:
-      # charset UTF-8 강제설정
       charset: UTF-8
       force: true
       enabled: true
   error:
     path: /error
-    # always | never
+    # always | never | on_param
     include-stacktrace: never
     whitelabel.enabled: false
-
 jwt:
   token:
-    header: X-Auth-Token
-    secret: demo?auth?bp
-    # 토큰 만료 시간 (1 day : 86400, 1 week 604800)
-    expiration: 86400
-    origin: demos
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    secret: dm?pj?sv
+
+# jasypt 암호화
+jasypt:
+  encryptor:
+    bean: standardPBEStringEncryptor
+
+#### Custom 속성 ####
+# 버전정보
+custom:
+  title: PAMS
+  version: 1.0.0
 ####################################################################################
 #                                    DEFAULT                                       #
 ####################################################################################
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 spring:
   main:
     # 스프링 bean 오버라이드 허용
@@ -37,6 +40,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    open-in-view: false
     hibernate:
       naming:
         # [물리] 스네이크 -> 카멜 케이스로 변경
@@ -44,30 +48,26 @@ spring:
         # [논리]
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     # JPA 실행 쿼리 표시
-    #show-sql: true
+    show-sql: true
     properties:
       hibernate:
-        # 콘솔에 표시되는 쿼리를 가독성 있게 표시
+        # 쿼리를 가독성 있게 표시
         format_sql: true
         # laze loading 전략 사용
         enable_lazy_load_no_trans: true
-  # 멀티파츠 사이즈 설정
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
-  # 세션 타입 설정
+  # 세션 설정
   session:
     store-type: jdbc
 
-#### Custom 속성 ####
-# 버전정보
-demo:
-  info:
-    version: 1.0.0
+  # 캐시 설정
+  cache:
+    type: redis
+  # redis 설정
+  redis:
+    host: localhost
+    port: 6379
 
 ---
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,11 +76,10 @@ demo:
 ####################################################################################
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 spring:
-  profiles: loc
+  config:
+    activate:
+      on-profile: loc
   datasource:
-    # always | embedded | never
-    initialization-mode: always
-    data: classpath:data.sql
     hikari:
       pool-name: hikari-cp
       maximum-pool-size: 30
@@ -90,14 +89,15 @@ spring:
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
-    url: jdbc:mysql://localhost:3306/test_db?serverTimezone=UTC&useLegacyDatetimeCode=false&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/demo?serverTimezone=UTC&useLegacyDatetimeCode=false&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: 1234
-
+    password: ENC(5/4lNCUd+tir2BEFyDxFyg==)
   jpa:
     hibernate:
       # create | create-drop | none | update | validate
-      ddl-auto: create-drop
-    #jackson:
-    # null인 데이터 제외
-  #  default-property-inclusion: non_null
+      ddl-auto: create
+  sql:
+    init:
+      # always | embedded | never
+      mode: embedded
+      data-locations: classpath:import.sql

@@ -37,7 +37,7 @@
         </filter>
     </appender>
 
-    <!-- 서비스 로그 어팬더 -->
+    <!-- 서비스 로그 파일 어팬더 -->
     <appender name="ServiceLogFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${SERVICE_LOG_PATH}</file>
         <append>true</append>
@@ -54,7 +54,7 @@
         </encoder>
     </appender>
 
-    <!-- 에러 로그 어팬더 -->
+    <!-- 에러 로그 파일 어팬더 -->
     <appender name="ErrorLogFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${ERROR_LOG_PATH}</file>
         <append>true</append>
@@ -76,68 +76,53 @@
         </filter>
     </appender>
 
-    <!--    &lt;!&ndash;logback listener &ndash;&gt;-->
-    <!--    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>-->
-
     <!-- ################################################################################################################ -->
 
     <!-- logging for test, prod -->
-    <springProfile name="test,prod">
+    <springProfile name="prod">
     </springProfile>
 
     <!-- logging for loc,dev -->
-    <springProfile name="loc,dev">
-        <logger name="com.example.demo" level="debug">
+    <springProfile name="loc,dev,test">
+        <root level="info">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ServiceLogFileAppender"/>
+        </root>
+
+        <logger name="com.example.demo" level="debug" additivity="false">
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <!-- 스프링 프레임워크 -->
         <logger name="org.springframework.core" level="info" additivity="false">
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="org.springframework.beans" level="info" additivity="false">
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="org.springframework.context" level="info" additivity="false">
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="org.springframework.web" level="info" additivity="false">
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <!-- 하이버네이트 로그 -->
-        <logger name="org.hibernate.SQL" level="debug" additivity="false">
-            <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
-        </logger>
+<!--        <logger name="org.hibernate.SQL" level="debug" additivity="false">-->
+<!--            <appender-ref ref="STDOUT"/>-->
+<!--        </logger>-->
         <!-- 하이버네이트 파라미터와 결과 -->
         <logger name="org.hibernate.type" level="trace" additivity="false">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
         </logger>
 
         <!-- JDBC SQL 파라메터 로그 -->
         <logger name="org.springframework.jdbc.core.StatementCreatorUtils" level="trace" additivity="false">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ServiceLogFileAppender"/>
-            <appender-ref ref="ErrorLogFileAppender"/>
         </logger>
 
         <!-- 히카리 CP -->
         <logger name="com.zaxxer.hikari" level="info" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
-
-        <root level="error">
-            <appender-ref ref="ErrorLogFileAppender"/>
-            <appender-ref ref="ErrorSTDOUT"/>
-        </root>
     </springProfile>
 </configuration>

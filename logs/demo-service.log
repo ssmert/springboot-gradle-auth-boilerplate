@@ -1,0 +1,26 @@
+15:00:23.087 INFO  c.e.d.c.i.c.AppEventListener - 
+15:00:23.101 INFO  c.e.d.c.i.c.AppEventListener - ######################################         Demo Server ShutDown       ######################################
+15:00:23.104 INFO  c.e.d.c.i.c.AppEventListener - #    ShutDown Time : 2020-07-10 15:00:23
+15:00:23.104 INFO  c.e.d.c.i.c.AppEventListener - #################################################################################################################
+15:00:23.104 INFO  c.e.d.c.i.c.AppEventListener - 
+15:00:23.110 DEBUG org.hibernate.SQL - 
+    
+    alter table TB_USER_ROLE 
+       drop 
+       foreign key FKo1m93hwjlt5x5rk6f37rcdy2b
+15:00:23.158 DEBUG org.hibernate.SQL - 
+    
+    alter table TB_USER_ROLE 
+       drop 
+       foreign key FK9m8pd2ejbdcq9yp4965epocav
+15:00:23.167 DEBUG org.hibernate.SQL - 
+    
+    drop table if exists TB_ROLE
+15:00:23.173 DEBUG org.hibernate.SQL - 
+    
+    drop table if exists TB_USER
+15:00:23.178 DEBUG org.hibernate.SQL - 
+    
+    drop table if exists TB_USER_ROLE
+15:00:23.187 TRACE o.h.type.spi.TypeConfiguration$Scope - Handling #sessionFactoryClosed from [org.hibernate.internal.SessionFactoryImpl@2adb25ce] for TypeConfiguration
+15:00:23.188 DEBUG o.h.type.spi.TypeConfiguration$Scope - Un-scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration$Scope@39a534fe] from SessionFactory [org.hibernate.internal.SessionFactoryImpl@2adb25ce]

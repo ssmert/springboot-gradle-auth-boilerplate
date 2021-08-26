@@ -12,30 +12,13 @@ import java.util.Map;
 
 /**
  * 일자관련한 기능을 제공하는 유틸리티이다.
- *
- * @author jonghyeon
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DateUtil {
-    /**
-     * 일자형식 : 년월일(yyyyMMdd)
-     */
-    public static final String DATE_FORMAT_YMD = "yyyyMMdd";
-
-    /**
-     * 일자형식 : 년월일시분초(yyyy-MM-dd)
-     */
-    public static final String DATE_FORMAT_YMD_DASH = "yyyy-MM-dd";
-
-    /**
-     * 일자형식 : 년월일시분초(yyyyMMddHHmmss)
-     */
-    public static final String DATE_FORMAT_YMS = "yyyyMMddHHmmss";
-
-    /**
-     * 일자형식 : 년월일시분초(yyyy-MM-dd HH:mm:ss)
-     */
-    public static final String DATE_FORMAT_YMS_DASH = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT_YMD = "yyyyMMdd";
+    private static final String DATE_FORMAT_YMD_DASH = "yyyy-MM-dd";
+    private static final String DATE_FORMAT_YMS = "yyyyMMddHHmmss";
+    private static final String DATE_FORMAT_YMS_DASH = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * 일자형식별 일자변환 오브젝트 보관소

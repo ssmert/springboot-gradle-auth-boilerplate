@@ -8,9 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
- * 암호화를 제공하는 유틸리티이다.
- *
- * @author jonghyeon
+ * 암호화 유틸
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CryptoUtil {
@@ -18,6 +16,7 @@ public class CryptoUtil {
      * SHA512 방식으로 암호화 한다.
      *
      * @param plainValue 평문값
+     *
      * @return 암호화된 값
      */
     public static String getSHA512(String plainValue) {
@@ -31,7 +30,8 @@ public class CryptoUtil {
 
             // 16진수 128바이트 값
             cryptValue = String.format("%0128x", new BigInteger(1, digest.digest()));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 

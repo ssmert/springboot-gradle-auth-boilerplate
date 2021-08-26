@@ -1,108 +1,81 @@
 package com.example.demo.auth.application;
 
-import com.example.demo.auth.api.transferobject.AuthUserVo;
-import com.example.demo.auth.util.CryptoUtil;
-import com.example.demo.core.infrastructure.constant.YesOrNo;
-import com.example.demo.core.infrastructure.exception.AuthException;
-import com.example.demo.role.api.transferobject.RoleResponse;
-import com.example.demo.role.application.RetrieveRoleService;
-import com.example.demo.role.domain.Role;
-import com.example.demo.user.application.RetrieveUserService;
-import com.example.demo.user.domain.User;
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.example.demo.auth.api.dto.AuthRequest;
+import com.example.demo.auth.api.dto.AuthResponse;
+import com.example.demo.auth.api.dto.AuthUser;
+import com.example.demo.auth.api.dto.TokenRefreshResponse;
+import com.example.demo.auth.util.JwtUtil;
+import com.example.demo.core.util.CommonUtil;
+import com.example.demo.core.util.RedisUtil;
+import com.example.demo.user.application.ChangeUserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * 사용자 인증 서비스이다.
- *
- * @author jonghyeon
+ * 인증 서비스
  */
 @Service
-@AllArgsConstructor
-@Slf4j
-public class AuthService implements UserDetailsService {
-    /**
-     * 최고관리자 식별자
-     */
-    private static final String SUPER_ADMIN_ID = "sadmin";
+@RequiredArgsConstructor
+public class AuthService {
+    @Value("${custom.title}")
+    private String keyPrefix;
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
+    private final ChangeUserService changeUserService;
 
     /**
-     * 최고관리자 역할
-     */
-    private static final String SUPER_ADMIN_ROLE = "ROLE_ADMIN";
-
-    /**
-     * 사용자를 조회하는 서비스
-     */
-    private final RetrieveUserService retrieveUserService;
-    /**
-     * 역할 조회 서비스
-     */
-    private final RetrieveRoleService retrieveRoleService;
-
-    /**
-     * 문자열 역할 목록기반의 {@link GrantedAuthority} 목록을 반환한다.
+     * 사용자 인증
      *
-     * @param userRoles 사용자역할목록
-     * @return {@link GrantedAuthority} 목록
+     * @param req 요청 데이터
+     *
+     * @return 인증 응답 데이터
      */
-    public Collection<? extends GrantedAuthority> getGrantedAuthorities(Set<Role> userRoles) {
-        return Collections2.transform(userRoles, (Function<Role, GrantedAuthority>) userRole -> new SimpleGrantedAuthority(userRole.getRoleId()));
+    public AuthResponse auth(AuthRequest req) {
+        // 컨텍스트에 인증 정보 설정
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getId(), req.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        AuthUser authUser = (AuthUser)auth.getPrincipal();
+
+        // 레디스에 리프레시 토큰 저장
+        String tokenKey = keyPrefix + "_" + authUser.getUserId();
+        redisUtil.setData(tokenKey, jwtUtil.generateRefreshToken(authUser), JwtUtil.REFRESH_TOKEN_EXPIRATION);
+
+        return new AuthResponse(jwtUtil.generateAccessToken(authUser), tokenKey, authUser.getUserId(), authUser.getUseYn());
     }
 
     /**
-     * 인증된 사용자정보를 반환한다.
+     * 사용자 최근 접속정보 설정
      *
+     * @param request 요청 데이터
      * @param userId 사용자식별자
-     * @return 인증된 사용자정보
      */
-    @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        AuthUserVo authUserVo = null;
+    public void setConnectInfo(HttpServletRequest request, long userId) {
+        // 접속 IP를 구한다.
+        String connIp = CommonUtil.getIp(request);
 
-        // 최고관리자이면 최고관리자 정보를 반환한다.
-        if (SUPER_ADMIN_ID.equals(userId)) {
-            authUserVo = this.createSuperUser();
-        } else {
-            // 사용자 정보를 조회한다.
-            User user = retrieveUserService.retrieveUserAuth(userId);
-
-            if (null != user) {
-                //사용자에 부여된 권한목록을 구한다.
-                Collection<? extends GrantedAuthority> authorities = getGrantedAuthorities(user.getUserRoles());
-                authUserVo = new AuthUserVo(user.getUserId(), user.getUserNm(), user.getUserPwd(), user.getUserUseYn(), true, true, true, true, authorities);
-            }
-        }
-
-        return authUserVo;
+        // 사용자 접속정보를 설정한다.
+        changeUserService.setLstCnnInfo(userId, connIp);
     }
 
     /**
-     * 최고관리자 인증정보를 생성하여 반환한다.
+     * 토큰 재발급
      *
-     * @return 사용자 인증정보
+     * @param refreshKey 리프레시 키
+     *
+     * @return 응답 데이터
      */
-    private AuthUserVo createSuperUser() {
-        try {
-            // 최고관리자 역할을 구한다.
-            RoleResponse roleRes = retrieveRoleService.retrieveRole(SUPER_ADMIN_ROLE);
-
-            return new AuthUserVo(SUPER_ADMIN_ID, "최고관리자", CryptoUtil.getSHA512(SUPER_ADMIN_ID), YesOrNo.Yes, true, true, true, true,
-                    Lists.newArrayList(new SimpleGrantedAuthority(roleRes.getRoleId())));
-        } catch (Exception e) {
-            throw new AuthException("로그인 처리중 알수없는 오류가 발생했습니다.\n관리자에게 문의하십시오", e);
-        }
+    public TokenRefreshResponse refreshToken(String refreshKey) {
+        AuthUser authUser = (AuthUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String accessToken = jwtUtil.refreshAccessToken(authUser, redisUtil.getData(refreshKey));
+        return new TokenRefreshResponse(accessToken);
     }
 }

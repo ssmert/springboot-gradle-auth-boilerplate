@@ -1,94 +1,74 @@
 package com.example.demo.user.application;
 
-
-import com.example.demo.core.infrastructure.constant.Errors;
-import com.example.demo.core.infrastructure.exception.IllegalArgException;
-import com.example.demo.core.util.CheckUtil;
-import com.example.demo.role.domain.Role;
-import com.example.demo.role.domain.RoleService;
-import com.example.demo.user.api.transferobject.UserRequest;
+import com.example.demo.auth.config.AuthPasswordEncoder;
+import com.example.demo.role.application.RoleService;
+import com.example.demo.user.api.dto.UserRequest;
 import com.example.demo.user.domain.User;
-import com.example.demo.user.domain.UserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
- * 사용자 변경 서비스이다.
- *
- * @author jonghyeon
+ * 사용자 변경 서비스
  */
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ChangeUserService {
-    /**
-     * 사용자 도메인 서비스
-     */
     private final UserService userService;
-
-    /**
-     * 역할 도메인 서비스
-     */
     private final RoleService roleService;
+    private final AuthPasswordEncoder authPasswordEncoder;
 
     /**
-     * 사용자를 등록한다.
+     * 사용자 등록
      *
-     * @param req 사용자 요청데이터
+     * @param req 요청데이터
      */
     public void registerUser(UserRequest req) {
-        if (CheckUtil.isNullOrEmpty(req.getUserId())) {
-            throw new IllegalArgException(Errors.UserErrCd.USERS001.getCode(), new Object[]{req.getUserId()});
-        }
+        User user = User.of(req.getLoginId(), req.getUserNm(), authPasswordEncoder.encode(req.getUserPw()), req.getUserPhone());
 
-        User user = User.of(req.getUserId(), req.getUserNm(), req.getUserPwd(), req.getUserPhone(), req.getUserTel(), req.getUserEmail(), req.getUserDept());
+        // 사용자 역할 할당
+        user.setUserRole(this.roleService.findById(req.getRoleId()));
 
-        // 역할식별자 목록이 존재하면 역할을 부여한다.
-        List<String> roleIdList = req.getRoleIdList();
-        if (!roleIdList.isEmpty()) {
-            List<Role> roleList = roleService.findByRoleIdIn(roleIdList);
-            user.assignRoles(roleList);
-        }
-
-        userService.newSave(user);
+        userService.save(user);
     }
 
     /**
-     * 사용자를 수정한다.
+     * 사용자 수정
      *
      * @param userId 사용자식별자
-     * @param req    요청데이터
+     * @param req 요청데이터
      */
-    public void editUser(String userId, UserRequest req) {
-        if (CheckUtil.isNullOrEmpty(userId)) {
-            throw new IllegalArgException(Errors.UserErrCd.USERS001.getCode(), new Object[]{userId});
-        }
+    public void editUser(Long userId, UserRequest req) {
+        User user = userService.findById(userId);
 
-        User user = userService.find(userId);
-        // 역할식별자 목록이 존재하면 역할을 부여한다.
-        List<String> roleIdList = req.getRoleIdList();
-        if (!roleIdList.isEmpty()) {
-            List<Role> roleList = roleService.findByRoleIdIn(roleIdList);
-            user.assignRoles(roleList);
-        }
+        // 사용자 역할 할당
+        user.setUserRole(this.roleService.findById(req.getRoleId()));
 
         user.edit(req);
     }
 
     /**
-     * 사용자를 삭제한다.
+     * 사용자 삭제
      *
      * @param userId 사용자식별자
      */
-    public void deleteUser(String userId) {
-        if (CheckUtil.isNullOrEmpty(userId)) {
-            throw new IllegalArgException(Errors.UserErrCd.USERS001.getCode(), new Object[]{userId});
-        }
-
-        User user = userService.find(userId);
+    public void deleteUser(Long userId) {
+        User user = userService.findById(userId);
         userService.delete(user);
     }
+
+    /**
+     * 사용자 최근 접속정보 설정
+     *
+     * @param userId 사용자식별자
+     * @param connIp 접속IP
+     */
+    public void setLstCnnInfo(long userId, String connIp) {
+        User user = userService.findById(userId);
+        user.setLstCnnInfo(LocalDateTime.now(), connIp);
+    }
+
 }
