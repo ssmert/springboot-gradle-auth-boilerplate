@@ -1,39 +1,23 @@
 # [Server] Demo Auth Server
 
-![Java](https://img.shields.io/badge/Java-1.8-red.svg) 
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.3.1-green.svg) 
-![Hibernate](https://img.shields.io/badge/Hibernate-5.4.6-orange.svg)
-![Gradle](https://img.shields.io/badge/Gradle-5.6.2-lightgrey.svg) 
-![Swagger](https://img.shields.io/badge/Swagger-2.9.2-blue.svg)
-![Lombok](https://img.shields.io/badge/Lombok-1.18.12-blueviolet.svg)
-![Guava](https://img.shields.io/badge/Guava-29.0-blueviolet.svg)
-![Pojomatic](https://img.shields.io/badge/pojomatic-2.2.1-blueviolet.svg)
-![JsonToken](https://img.shields.io/badge/JsonToken-0.9.1-blueviolet.svg)
-![QueryDsl](https://img.shields.io/badge/QueryDsl-4.3.1-blueviolet.svg)
-![MySql](https://img.shields.io/badge/MySql-8.0.20-blueviolet.svg)
+![Java](https://img.shields.io/badge/Java-11-red.svg) 
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6.7-green.svg) 
+![Hibernate](https://img.shields.io/badge/Hibernate-5.6.8-orange.svg)
+![Gradle](https://img.shields.io/badge/Gradle-7.4.1-lightgrey.svg) 
+![Swagger](https://img.shields.io/badge/Swagger-3-blue.svg)
+![Lombok](https://img.shields.io/badge/Lombok-1.18.14-blueviolet.svg)
+![Guava](https://img.shields.io/badge/Guava-31.1-blueviolet.svg)
+![QueryDsl](https://img.shields.io/badge/QueryDsl-5.0.0-blueviolet.svg)
+![MySql](https://img.shields.io/badge/MySql-8.0.29-blueviolet.svg)
 
-# 알림!
-master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(dev)에서 작업합니다.
+2022/05/25
 
-># 작업순서
-작성중...
+# 브랜치
+* 운영 : master
+* QA : qa
+* 개발 : develop
 
-# 기술스택
->2020/07/02 기준
-- Java         : 1.8
-- Spring Boot  : [2.3.1](https://spring.io/projects/spring-boot)
-- Hibernate    : [5.4.6]()
-- Gradle       : [6.5.1](https://gradle.org/releases/)
-- Swagger      : 2.9.2
-- Lombok       : [1.18.12](https://projectlombok.org/setup/gradle)
-- Guava       : [29.0-jre](https://github.com/google/guava)
-- Pojomatic      : 2.2.1
-- JsonToken      : 0.9.1
-- QueryDsl      : 4.3.1
-- MySql      : 8.0.20
-
-># 디렉토리 구조
-작성중...
+# 디렉토리 구조
 
 # 커밋메세지
 ```
@@ -52,7 +36,6 @@ master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(
 # 참고
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [Gradle](https://docs.gradle.org/current/userguide/userguide.html)
-
 ---
 
 # 개발표준 정의
@@ -61,7 +44,7 @@ master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(
 프로젝트의 개발 시 개발생산성 향상 및 운영의 효율화를 위해 반드시 준수되어야 하는 준수사항을 정의함
 
  - 제시된 표준은 철저히 준수한다.
- - 모든 화면은 최대 응답속도 5초 이내를 목표로 Design 되어야 한다.
+ - 모든 거래 최대 응답속도 5초 이내를 목표로 구현되어야 한다.
  - 본 표준안은 최소한의 필수사항을 지키도록 유도하고 해서는 안되는 것들을 지적하는 내용이며, 개개인의 다양한 능력과 개념들로 본 표준을 확장시켜 시스템에 적용시키도록 한다.
 
 ## 2. 명명규칙 표준
@@ -70,7 +53,7 @@ master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(
 
 ## 3. Resource 명명규칙
 
-작성중...
+작성중
 
 ## 4. 주석처리
  - 각 Method 앞에 Method의 Parameter, Return Value의 의미와 Method의 간략한 설명을 기술한다.
@@ -89,7 +72,7 @@ master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(
      * @param handler 핸들러
      *
      * @return 항상 참
-     * @throws Exception 예외
+     * @exception Exception 예외
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -97,4 +80,20 @@ master브랜치를 기본 템플릿으로 기타 변경 작업은 타 브랜치(
         log.info(String.format("%s %s", request.getRequestURI(), request.getMethod()));
         return super.preHandle(request, response, handler);
     }
+```
+
+## 빌드
+```
+- 이미지 빌드(
+docker build --build-arg ENVIRONMENT=dev -t demo-server .
+
+[로컬 도커 실행(도커 내부 DB사용)]
+
+- 도커 빌드 및 구동
+docker-compose up
+
+- 도커 내부 mysql 조회
+docker-compose exec mysql sh
+mysql -uroot -p1234
+show schemas;
 ```
