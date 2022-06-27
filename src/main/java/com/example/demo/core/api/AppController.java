@@ -31,7 +31,7 @@ public class AppController {
     @GetMapping(value = "/info")
     public String retrieveServerInfo() {
         // 현재 환경코드를 구한다.
-        EnvCd curEnvCd = EnvCd.codeOf(environment.getActiveProfiles()[0]);
+        EnvCd env = EnvCd.codeOf(environment.getActiveProfiles()[0]).orElse(EnvCd.None);
 
         // 어플리케이션 서버정보를 담은 HTML를 작성한다.
         StringBuilder appInfo = new StringBuilder();
@@ -44,7 +44,7 @@ public class AppController {
         appInfo.append("</div>");
         appInfo.append("<ul>");
         appInfo.append("<li><b>Version</b> : ").append(version).append("</li>");
-        appInfo.append("<li><b>Profile</b> : ").append(String.format("%s(%s)", curEnvCd.getTitle(), curEnvCd.name())).append("</li>");
+        appInfo.append("<li><b>Profile</b> : ").append(String.format("%s(%s)", env.getTitle(), env.name())).append("</li>");
         appInfo.append("</ul>");
         appInfo.append("</div>");
         appInfo.append("</body>");
