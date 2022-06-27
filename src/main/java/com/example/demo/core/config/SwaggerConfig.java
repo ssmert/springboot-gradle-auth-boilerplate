@@ -28,7 +28,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.OAS_30)
                 .apiInfo(new ApiInfoBuilder()
-                        .title("PAMS 프로젝트")
+                        .title("DEMO 프로젝트")
                         .description("Perioperative Anticoagulant Management System")
                         .license("example")
                         .version("1.0")
